@@ -32,7 +32,7 @@
   "author": "Tim O'Brien <tobrien@discursive.com>",
   "license": "Apache-2.0",
   "dependencies": {
-    "zod": "^3.25.51"
+    "zod": "^4.3.5"
   },
   "devDependencies": {
     "@types/node": "^25.0.6",
