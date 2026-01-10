@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { ContextManager, type ContextStats } from './context-manager';
-import type { DynamicContentItem } from './types';
+import { ContextManager, type ContextStats } from '../src/context-manager';
+import type { DynamicContentItem } from '../src/types';
 
 describe('ContextManager', () => {
     let manager: ContextManager;

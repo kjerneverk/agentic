@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { ToolRegistry, type Tool, type ToolContext } from './tools';
+import { ToolRegistry, type Tool, type ToolContext } from '../src/tools';
 
 describe('ToolRegistry', () => {
     let registry: ToolRegistry;

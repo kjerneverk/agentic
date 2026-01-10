@@ -16,8 +16,10 @@
   "scripts": {
     "clean": "rm -rf dist",
     "build": "vite build",
-    "test": "vitest run",
+    "test": "vitest run --coverage",
+    "test:coverage": "vitest run --coverage",
     "lint": "eslint src",
+    "precommit": "npm run lint && npm run test",
     "prepublishOnly": "npm run clean && npm run build"
   },
   "keywords": [
@@ -38,6 +40,7 @@
     "@types/node": "^25.0.6",
     "@typescript-eslint/eslint-plugin": "^8.33.1",
     "@typescript-eslint/parser": "^8.33.1",
+    "@vitest/coverage-v8": "^4.0.16",
     "eslint": "^9.28.0",
     "globals": "^17.0.0",
     "typescript": "^5.8.3",
