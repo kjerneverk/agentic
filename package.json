@@ -1,6 +1,6 @@
 {
   "name": "@riotprompt/agentic",
-  "version": "0.0.5-dev.0",
+  "version": "0.0.5",
   "description": "Shared agentic framework for multi-turn AI conversations and tool orchestration",
   "type": "module",
   "main": "./dist/index.js",
