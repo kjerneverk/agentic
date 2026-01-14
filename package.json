@@ -39,6 +39,7 @@
     "url": "https://github.com/kjerneverk/agentic"
   },
   "dependencies": {
+    "@fjell/logging": "^4.4.68",
     "zod": "^4.3.5"
   },
   "devDependencies": {
