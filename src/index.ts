@@ -52,6 +52,22 @@ export type {
 } from './tools';
 export { ToolRegistry } from './tools';
 
+// Tool Security
+export type {
+    ToolSecurityConfig,
+    ToolValidationResult,
+    ToolGuardEvents,
+} from './tool-guard';
+export { ToolGuard } from './tool-guard';
+
+// Tool Sandboxing
+export type {
+    SandboxedContext,
+    SandboxOptions,
+    ToolSandboxEvents,
+} from './tool-sandbox';
+export { ToolSandbox, createSecureTool } from './tool-sandbox';
+
 // Context Manager
 export type { ContextStats } from './context-manager';
 export { ContextManager } from './context-manager';
