@@ -4,8 +4,10 @@
  * Manages tool definitions and execution for agentic workflows.
  */
 
-import { z } from 'zod';
+import { z, ZodSchema } from 'zod';
 import { DEFAULT_LOGGER, wrapLogger, type Logger } from './logger';
+import { ToolGuard } from './tool-guard';
+import { ToolSandbox } from './tool-sandbox';
 
 // ===== TYPE DEFINITIONS =====
 
@@ -62,6 +64,8 @@ export interface Tool {
     category?: string;
     cost?: ToolCost;
     examples?: ToolExample[];
+    /** Optional Zod schema for parameter validation */
+    schema?: ZodSchema<any>;
 }
 
 /**
@@ -123,6 +127,7 @@ export interface ToolDefinition {
     category?: string;
     cost?: ToolCost;
     examples?: ToolExample[];
+    schema?: ZodSchema<any>;
 }
 
 // ===== VALIDATION SCHEMAS =====
@@ -169,6 +174,8 @@ export class ToolRegistry {
         string,
         { calls: number; failures: number; totalDuration: number }
     >;
+    private toolGuard?: ToolGuard;
+    private toolSandbox?: ToolSandbox;
 
     private constructor(context: ToolContext = {}, logger?: Logger) {
         this.tools = new Map();
@@ -184,6 +191,38 @@ export class ToolRegistry {
      */
     static create(context?: ToolContext, logger?: Logger): ToolRegistry {
         return new ToolRegistry(context, logger);
+    }
+
+    /**
+     * Configure security guard for tool execution
+     */
+    withSecurity(guard: ToolGuard): this {
+        this.toolGuard = guard;
+        this.logger.debug('Security guard configured');
+        return this;
+    }
+
+    /**
+     * Get the configured security guard
+     */
+    getSecurityGuard(): ToolGuard | undefined {
+        return this.toolGuard;
+    }
+
+    /**
+     * Configure sandbox for tool execution
+     */
+    withSandbox(sandbox: ToolSandbox): this {
+        this.toolSandbox = sandbox;
+        this.logger.debug('Sandbox configured');
+        return this;
+    }
+
+    /**
+     * Get the configured sandbox
+     */
+    getSandbox(): ToolSandbox | undefined {
+        return this.toolSandbox;
     }
 
     /**
@@ -262,6 +301,24 @@ export class ToolRegistry {
             throw new Error(`Tool "${name}" not found`);
         }
 
+        // Security check: is tool allowed?
+        if (this.toolGuard && !this.toolGuard.isToolAllowed(name)) {
+            throw new Error(`Tool "${name}" is not allowed`);
+        }
+
+        // Security check: validate parameters if schema exists
+        if (this.toolGuard && tool.schema) {
+            const validation = this.toolGuard.validateParams(
+                name,
+                params,
+                tool.schema
+            );
+            if (!validation.success) {
+                throw new Error(`Tool "${name}": ${validation.error}`);
+            }
+            params = validation.data;
+        }
+
         this.logger.debug('Executing tool', { name, params });
 
         const startTime = Date.now();
@@ -269,7 +326,18 @@ export class ToolRegistry {
         stats.calls++;
 
         try {
-            const result = await tool.execute(params, this.context);
+            let result;
+            
+            // Execute with sandbox if configured
+            if (this.toolSandbox) {
+                result = await this.toolSandbox.execute(
+                    tool,
+                    params,
+                    this.context
+                );
+            } else {
+                result = await tool.execute(params, this.context);
+            }
 
             const duration = Date.now() - startTime;
             stats.totalDuration += duration;
@@ -284,6 +352,23 @@ export class ToolRegistry {
 
             throw error;
         }
+    }
+
+    /**
+     * Safely parse and execute a tool from JSON arguments
+     */
+    async executeFromJSON(name: string, jsonArgs: string): Promise<any> {
+        if (this.toolGuard) {
+            const parseResult = this.toolGuard.parseToolArguments(name, jsonArgs);
+            if (!parseResult.success) {
+                throw new Error(`Tool "${name}": ${parseResult.error}`);
+            }
+            return this.execute(name, parseResult.data);
+        }
+
+        // No guard, parse directly
+        const params = JSON.parse(jsonArgs);
+        return this.execute(name, params);
     }
 
     /**
@@ -352,6 +437,7 @@ export class ToolRegistry {
             category: tool.category,
             cost: tool.cost,
             examples: tool.examples,
+            schema: tool.schema,
         }));
     }
 

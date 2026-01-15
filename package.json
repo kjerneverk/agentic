@@ -1,6 +1,7 @@
 {
   "name": "@riotprompt/agentic",
-  "version": "0.0.5",
+  "version": "1.0.0",
+  "_versionReset": "2026-01-15",
   "description": "Shared agentic framework for multi-turn AI conversations and tool orchestration",
   "type": "module",
   "main": "./dist/index.js",
@@ -20,7 +21,7 @@
     "test": "vitest run --coverage",
     "test:coverage": "vitest run --coverage",
     "lint": "eslint src",
-    "precommit": "npm run lint && npm run test",
+    "precommit": "npm run build && npm run lint && npm run test",
     "prepublishOnly": "npm run clean && npm run build"
   },
   "keywords": [
@@ -39,6 +40,7 @@
     "url": "https://github.com/kjerneverk/agentic"
   },
   "dependencies": {
+    "@fjell/logging": "^4.4.68",
     "zod": "^4.3.5"
   },
   "devDependencies": {

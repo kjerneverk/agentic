@@ -251,11 +251,12 @@ export class ContextManager {
     }
 
     private hashContent(content: string): string {
+        // Use 32 characters (128 bits) for sufficient collision resistance
         return crypto
             .createHash('sha256')
             .update(content)
             .digest('hex')
-            .substring(0, 16);
+            .substring(0, 32);
     }
 
     private normalizeContent(content: string): string {
