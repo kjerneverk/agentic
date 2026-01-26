@@ -9,6 +9,5 @@ coverage/
 package-lock.json
 
 output/
-.kodrdriv-test-cache.json
-.kodrdriv*.json
+.kodrdriv*
 **/*kodrdriv*.json
