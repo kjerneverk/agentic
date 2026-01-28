@@ -1,6 +1,6 @@
 {
   "name": "@riotprompt/agentic",
-  "version": "1.0.1-dev.0",
+  "version": "1.0.1",
   "_versionReset": "2026-01-15",
   "description": "Shared agentic framework for multi-turn AI conversations and tool orchestration",
   "type": "module",
@@ -56,6 +56,8 @@
     "vitest": "^4.0.16"
   },
   "overrides": {
-    "ajv": "^8.12.0"
+    "vite-plugin-dts": {
+      "ajv": "^8.12.0"
+    }
   }
 }
