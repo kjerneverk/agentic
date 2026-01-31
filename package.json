@@ -1,6 +1,6 @@
 {
   "name": "@riotprompt/agentic",
-  "version": "1.0.3-dev.0",
+  "version": "1.0.4",
   "_versionReset": "2026-01-15",
   "description": "Shared agentic framework for multi-turn AI conversations and tool orchestration",
   "type": "module",
@@ -41,7 +41,7 @@
   },
   "dependencies": {
     "@fjell/logging": "^4.4.68",
-    "zod": "^4.3.5"
+    "zod": "^4.3.6"
   },
   "devDependencies": {
     "@types/node": "^25.0.6",
