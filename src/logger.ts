@@ -10,7 +10,7 @@ import Logging from '@fjell/logging';
 export const LIBRARY_NAME = 'agentic';
 
 // Get the library-level logger from Fjell
-const LibLogger = Logging.getLogger('@theunwalked/agentic');
+const LibLogger = Logging.getLogger('@riotprompt/agentic');
 
 /**
  * Create a silent logger with the given name

@@ -19,7 +19,7 @@ The agentic package includes security features for tool execution:
 ### Tool Validation (ToolGuard)
 
 ```typescript
-import { ToolGuard } from '@theunwalked/agentic';
+import { ToolGuard } from '@riotprompt/agentic';
 import { z } from 'zod';
 
 const guard = new ToolGuard({
@@ -44,7 +44,7 @@ if (!result.valid) {
 ### Tool Sandboxing (ToolSandbox)
 
 ```typescript
-import { ToolSandbox } from '@theunwalked/agentic';
+import { ToolSandbox } from '@riotprompt/agentic';
 
 const sandbox = new ToolSandbox({
   enabled: true,
