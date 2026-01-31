@@ -1,5 +1,5 @@
 {
-  "name": "@riotprompt/agentic",
+  "name": "@kjerneverk/agentic",
   "version": "1.0.5-dev.0",
   "_versionReset": "2026-01-15",
   "description": "Shared agentic framework for multi-turn AI conversations and tool orchestration",
