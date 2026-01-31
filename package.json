@@ -41,7 +41,7 @@
   },
   "dependencies": {
     "@fjell/logging": "^4.4.68",
-    "zod": "^4.3.5"
+    "zod": "^4.3.6"
   },
   "devDependencies": {
     "@types/node": "^25.0.6",
