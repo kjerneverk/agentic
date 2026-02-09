@@ -72,6 +72,29 @@ export { ToolSandbox, createSecureTool } from './tool-sandbox';
 export type { ContextStats } from './context-manager';
 export { ContextManager } from './context-manager';
 
+// Conversation Manager
+export type {
+    ConversationManagerOptions,
+    SerializedConversation,
+} from './conversation';
+export { ConversationManager } from './conversation';
+
+// Agent Loop
+export type {
+    AgentChunkType,
+    AgentChunk,
+    AgentLoopEvents,
+    AgentProvider,
+    AgentRequest,
+    AgentToolDefinition,
+    AgentExecutionOptions,
+    AgentProviderResponse,
+    AgentStreamChunk,
+    AgentLoopOptions,
+    AgentLoopResult,
+} from './loop';
+export { AgentLoop } from './loop';
+
 /**
  * Package version
  */
