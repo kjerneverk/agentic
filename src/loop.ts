@@ -46,7 +46,12 @@ export interface AgentChunk {
     /** Metadata */
     meta?: {
         iteration?: number;
-        tokenUsage?: { input: number; output: number };
+        tokenUsage?: { 
+            input: number; 
+            output: number;
+            cacheCreation?: number;
+            cacheRead?: number;
+        };
     };
 }
 
@@ -305,7 +310,16 @@ export class AgentLoop {
                 for (const toolCall of response.toolCalls) {
                     if (this.cancelled) break;
 
-                    const args = JSON.parse(toolCall.function.arguments);
+                    // Parse arguments, defaulting to empty object if empty or invalid
+                    let args: Record<string, unknown> = {};
+                    if (toolCall.function.arguments && toolCall.function.arguments.trim()) {
+                        try {
+                            args = JSON.parse(toolCall.function.arguments);
+                        } catch {
+                            // If arguments can't be parsed, use empty object
+                            args = {};
+                        }
+                    }
                     this.events.onToolCallStart?.(toolCall.function.name, args);
 
                     const startTime = Date.now();
@@ -392,6 +406,8 @@ export class AgentLoop {
         let iteration = 0;
         let totalInputTokens = 0;
         let totalOutputTokens = 0;
+        let totalCacheCreation = 0;
+        let totalCacheRead = 0;
 
         while (iteration < this.maxIterations && !this.cancelled) {
             iteration++;
@@ -461,15 +477,37 @@ export class AgentLoop {
                             name: chunk.toolCall.name || '',
                             arguments: '',
                         });
+                        // Reset delta counter for this tool call
+                        (toolCallsInProgress.get(index) as any).deltaCount = 0;
+                        // Yield a progress indicator when tool call starts
+                        if (chunk.toolCall.name) {
+                            yield { 
+                                type: 'text', 
+                                text: `\n[preparing ${chunk.toolCall.name}...]` 
+                            };
+                        }
                     } else if (chunk.type === 'tool_call_delta' && chunk.toolCall) {
                         const index = chunk.toolCall.index ?? 0;
-                        const tc = toolCallsInProgress.get(index);
+                        const tc = toolCallsInProgress.get(index) as any;
                         if (tc && chunk.toolCall.argumentsDelta) {
                             tc.arguments += chunk.toolCall.argumentsDelta;
+                            // Show progress dots every 50 deltas (roughly every few KB of data)
+                            tc.deltaCount = (tc.deltaCount || 0) + 1;
+                            if (tc.deltaCount % 50 === 0) {
+                                yield { type: 'text', text: '.' };
+                            }
                         }
                     } else if (chunk.type === 'usage' && chunk.usage) {
                         totalInputTokens += chunk.usage.inputTokens;
                         totalOutputTokens += chunk.usage.outputTokens;
+                        // Track cache stats if available
+                        const usage = chunk.usage as any;
+                        if (usage.cacheCreationInputTokens) {
+                            totalCacheCreation += usage.cacheCreationInputTokens;
+                        }
+                        if (usage.cacheReadInputTokens) {
+                            totalCacheRead += usage.cacheReadInputTokens;
+                        }
                     }
                 }
 
@@ -482,7 +520,18 @@ export class AgentLoop {
                     const toolCalls = this.buildToolCalls(toolCallsInProgress);
                     this.conversation.addAssistantToolCalls(toolCalls, accumulatedText || undefined);
                     
-                    yield { type: 'turn_complete', meta: { iteration } };
+                    yield { 
+                        type: 'turn_complete', 
+                        meta: { 
+                            iteration,
+                            tokenUsage: {
+                                input: totalInputTokens,
+                                output: totalOutputTokens,
+                                cacheCreation: totalCacheCreation,
+                                cacheRead: totalCacheRead,
+                            }
+                        } 
+                    };
                     yield* this.executeToolCallsStreaming(toolCalls, iteration);
                 } else {
                     // Final response
@@ -493,7 +542,12 @@ export class AgentLoop {
                         type: 'done',
                         meta: { 
                             iteration,
-                            tokenUsage: { input: totalInputTokens, output: totalOutputTokens }
+                            tokenUsage: { 
+                                input: totalInputTokens, 
+                                output: totalOutputTokens,
+                                cacheCreation: totalCacheCreation,
+                                cacheRead: totalCacheRead,
+                            }
                         }
                     };
                     return;
@@ -527,7 +581,16 @@ export class AgentLoop {
         for (const toolCall of toolCalls) {
             if (this.cancelled) break;
 
-            const args = JSON.parse(toolCall.function.arguments);
+            // Parse arguments, defaulting to empty object if empty or invalid
+            let args: Record<string, unknown> = {};
+            if (toolCall.function.arguments && toolCall.function.arguments.trim()) {
+                try {
+                    args = JSON.parse(toolCall.function.arguments);
+                } catch {
+                    // If arguments can't be parsed, use empty object
+                    args = {};
+                }
+            }
             
             yield {
                 type: 'tool_start',
