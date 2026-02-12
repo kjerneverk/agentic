@@ -32,6 +32,8 @@ export interface ToolContext {
     storage?: any;
     logger?: Logger;
     conversationState?: any;
+    /** Callback to update the shared context (e.g., change working directory) */
+    updateContext?: (updates: Partial<ToolContext>) => void;
     [key: string]: any;
 }
 
